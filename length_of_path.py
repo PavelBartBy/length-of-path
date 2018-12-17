@@ -5,11 +5,22 @@ import functools as func
 
 
 class IInterface(object):
-
+    """Interface class with usable methods"""
     def read(self):
         """read from some file"""
 
 class CSVReader(IInterface):
+    
+    def __eq__(self, value):
+        if value.isdigit()==True:
+            pass
+        else:
+            print (value)
+            raise Exception("One or more wrong coordinates")
+
+    def validation(self,row):
+        for i in row:
+            self.__eq__(i)
 
     def read(self, file_name):
         """
@@ -24,17 +35,19 @@ class CSVReader(IInterface):
                 if line_count==0:
                     line_count+=1
                 else:
-                    coordinates.append([row[0]]+[row[1]])  #gives us array list
+                    self.validation(row)
+                    coordinates.append(([row[0]])+[row[1]])  #gives us array list
                     line_count+=1
         return coordinates
 
 
-class FReaders(IInterface):
+class ReadersFactory (IInterface):
     """ 
     Can choose Reader for file;
     :param file_name: include file location and file name
     :return: array of coordinates from file
-    """   
+    """
+
     def read(self,file_name):
         readers_dict={ '.csv': CSVReader()
                        #,'.txt': TXTReader()
@@ -50,9 +63,13 @@ class Point:
     def __init__(self,x,y):
         self.x=int(x)
         self.y=int(y)
-
-class Length_of_the_Path:
     
+
+class Route:
+
+    def __init__(self, array_of_coordinates):
+        self.array_of_coordinates=array_of_coordinates
+
     def create_points(self,array_of_coordinates):
         """ 
         Create list of points: Point object;
@@ -64,7 +81,8 @@ class Length_of_the_Path:
             point_list.append(Point(row[0],row[1]))
         return point_list
     
-    def section_calculate(self,point1,point2):
+    @staticmethod
+    def section_calculate(point1,point2):
         """ 
         Calculate length one section between two points;
         :param point1: point of start section
@@ -72,7 +90,7 @@ class Length_of_the_Path:
         :return: section length
         """   
         section_length=math.sqrt((point1.x-point2.x)**2+(point1.y-point2.y)**2)
-        return section_length
+        return math.ceil(section_length)
     
     def create_sections(self,point_list):
         """ 
@@ -83,20 +101,17 @@ class Length_of_the_Path:
         section_list=[]
         for point1 in point_list:
             for point2 in point_list[1:]:
-                section_list.append(Length_of_the_Path.section_calculate(self,point1,point2))
+                section_list.append(self.section_calculate(point1,point2))
         return section_list
 
-    def length_calculate(self):
+    def __len__(self):
         """ 
         Finally calculate length of the path;
         :return: length
-        """     
-        some_reader=FReaders()
-        array_of_coordinates=some_reader.read(r'C:\Users\BART\ShakerProject\coordinates.csv')
-        point_list=Length_of_the_Path.create_points(self,array_of_coordinates)
-        section_list=Length_of_the_Path.create_sections(self,point_list)
-        length=func.reduce(lambda a,x:a+x,section_list)
+        """
+        length=func.reduce(lambda a,x:a+x,
+                           self.create_sections(self.create_points(self.array_of_coordinates)))
         return length
 
-temp=Length_of_the_Path()
-print(temp.length_calculate())
+temp=Route(ReadersFactory().read(r'C:\Users\BART\length-of-path\coordinates.csv'))
+print(len(temp))
