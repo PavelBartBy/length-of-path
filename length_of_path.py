@@ -42,6 +42,7 @@ class CSVReader(IRead):
 
 readers_dict={ '.csv': CSVReader()
              #,'.txt': TXTReader()
+             #, other data format
                 }
 
 class ReadersFactory (IRead):
@@ -129,5 +130,5 @@ class Route:
                            self.create_sections(self.create_points(self.array_of_points)))
         return length
 
-temp=Route(ReadersFactory(readers_dict).read(r'C:\Users\BART\length-of-path\coordinates.csv'))
+temp=Route(ReadersFactory(readers_dict).read(r'coordinates.csv'))
 print(len(temp))
